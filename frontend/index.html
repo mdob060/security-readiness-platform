@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NATIONAL CYBER DEFENSE PROTOTYPE C+</title>
+  <link rel="stylesheet" href="/static/css/style.css" />
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════════════════════
+     TOP BAR
+═══════════════════════════════════════════════════════════ -->
+<header class="topbar">
+  <div class="topbar-logo">
+    <div class="shield-icon">🛡</div>
+    <div>
+      <div class="sys-name">NATIONAL CYBER DEFENSE</div>
+      <div class="sys-sub">PROTOTYPE C+ · SOC PLATFORM v1.0</div>
+    </div>
+  </div>
+
+  <div class="topbar-status">
+    <div class="status-indicator">
+      <div class="status-dot"></div>
+      SYSTEM OPERATIONAL
+    </div>
+    <div class="status-indicator">
+      <div class="status-dot yellow"></div>
+      THREAT LEVEL: ELEVATED
+    </div>
+    <div id="utc-clock" class="topbar-time">--:--:-- UTC</div>
+    <div class="classification-badge">PROTOTYPE</div>
+  </div>
+</header>
+
+<!-- ══════════════════════════════════════════════════════════
+     SIDEBAR
+═══════════════════════════════════════════════════════════ -->
+<nav class="sidebar">
+  <div class="nav-section">
+    <div class="nav-section-title">Operations</div>
+    <div class="nav-item active" data-page="overview">
+      <span class="nav-icon">⊞</span> Overview
+    </div>
+    <div class="nav-item" data-page="lookup">
+      <span class="nav-icon">🔍</span> IOC Lookup
+    </div>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-section-title">Threat Intelligence</div>
+    <div class="nav-item" data-page="iocs">
+      <span class="nav-icon">⚑</span> IOC Database
+    </div>
+    <div class="nav-item" data-page="events">
+      <span class="nav-icon">⚡</span> Threat Events
+      <span class="nav-badge" id="nav-badge-events">2</span>
+    </div>
+    <div class="nav-item" data-page="actors">
+      <span class="nav-icon">👤</span> Threat Actors
+    </div>
+    <div class="nav-item" data-page="feeds">
+      <span class="nav-icon">📡</span> Intel Feeds
+    </div>
+    <div class="nav-item" data-page="mitre">
+      <span class="nav-icon">🗂</span> MITRE ATT&CK
+    </div>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-section-title">Response Engine</div>
+    <div class="nav-item" data-page="playbooks">
+      <span class="nav-icon">▶</span> Playbooks
+    </div>
+    <div class="nav-item" data-page="executions">
+      <span class="nav-icon">📋</span> Executions
+    </div>
+  </div>
+</nav>
+
+<!-- ══════════════════════════════════════════════════════════
+     MAIN CONTENT
+═══════════════════════════════════════════════════════════ -->
+<main class="main-content">
+
+  <!-- ── Overview ─────────────────────────────────────────── -->
+  <div class="page active" id="page-overview">
+    <div class="page-header">
+      <div class="page-title">SOC Overview <span>Threat Intelligence & Response</span></div>
+      <button class="btn btn-primary btn-sm" onclick="loadOverview()">↻ Refresh</button>
+    </div>
+
+    <div class="stats-grid">
+      <div class="stat-card critical">
+        <div class="stat-label">Active Threats</div>
+        <div class="stat-value red" id="stat-active-threats">—</div>
+        <div class="stat-sub">Requires immediate attention</div>
+      </div>
+      <div class="stat-card critical">
+        <div class="stat-label">Critical IOCs</div>
+        <div class="stat-value red" id="stat-critical-iocs">—</div>
+        <div class="stat-sub">Severity: CRITICAL</div>
+      </div>
+      <div class="stat-card blue">
+        <div class="stat-label">Total IOCs</div>
+        <div class="stat-value cyan" id="stat-total-iocs">—</div>
+        <div class="stat-sub">In database</div>
+      </div>
+      <div class="stat-card medium">
+        <div class="stat-label">Threat Events</div>
+        <div class="stat-value" id="stat-total-events">—</div>
+        <div class="stat-sub">All time</div>
+      </div>
+      <div class="stat-card success">
+        <div class="stat-label">Auto Responses</div>
+        <div class="stat-value green" id="stat-executions">—</div>
+        <div class="stat-sub">Total executions</div>
+      </div>
+      <div class="stat-card success">
+        <div class="stat-label">Threats Blocked</div>
+        <div class="stat-value green" id="stat-blocked">—</div>
+        <div class="stat-sub">Automated actions</div>
+      </div>
+      <div class="stat-card high">
+        <div class="stat-label">Threat Actors</div>
+        <div class="stat-value orange" id="stat-actors">—</div>
+        <div class="stat-sub">Tracked APTs</div>
+      </div>
+      <div class="stat-card cyan">
+        <div class="stat-label">Intel Feeds</div>
+        <div class="stat-value cyan" id="stat-feeds">—</div>
+        <div class="stat-sub">Active / Total</div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-header">
+        <span class="panel-title">⚡ Recent Threat Events</span>
+        <button class="btn btn-secondary btn-sm" onclick="navigate('events')">View All →</button>
+      </div>
+      <div class="panel-body">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>ID</th><th>Title</th><th>Severity</th><th>Status</th><th>Time</th>
+            </tr>
+          </thead>
+          <tbody id="recent-events-body">
+            <tr><td colspan="5" class="loading"><div class="spinner"></div> Loading...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── IOC Lookup ────────────────────────────────────────── -->
+  <div class="page" id="page-lookup">
+    <div class="page-header">
+      <div class="page-title">IOC Lookup <span>Real-time Intelligence Check</span></div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-header">
+        <span class="panel-title">🔍 Indicator Lookup</span>
+      </div>
+      <div class="panel-body" style="padding:20px">
+        <p style="font-size:13px;color:var(--text-secondary);margin-bottom:16px">
+          Check any IP address, domain, URL, file hash, or email against the threat intelligence database.
+        </p>
+        <div class="lookup-form">
+          <input class="search-input" id="lookup-input" placeholder="Enter IP, domain, URL, hash, or email..."
+            style="flex:1" onkeydown="if(event.key==='Enter') lookupIOC()" />
+          <button class="btn btn-primary" onclick="lookupIOC()">🔍 Lookup</button>
+        </div>
+        <div class="lookup-result" id="lookup-result"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── IOC Database ──────────────────────────────────────── -->
+  <div class="page" id="page-iocs">
+    <div class="page-header">
+      <div class="page-title">IOC Database <span>Indicators of Compromise</span></div>
+      <div style="font-size:12px;color:var(--text-muted)">MITRE ATT&CK v14.1 · TLP:WHITE</div>
+    </div>
+
+    <div class="filter-bar">
+      <input class="search-input" id="ioc-search" placeholder="Search IOCs..." oninput="filterIOCs()" />
+      <select class="filter-select" id="ioc-type-filter" onchange="filterIOCs()">
+        <option value="">All Types</option>
+        <option value="ip">IP Address</option>
+        <option value="domain">Domain</option>
+        <option value="url">URL</option>
+        <option value="sha256">SHA256</option>
+        <option value="md5">MD5</option>
+        <option value="email">Email</option>
+        <option value="cve">CVE</option>
+      </select>
+      <select class="filter-select" id="ioc-severity-filter" onchange="filterIOCs()">
+        <option value="">All Severities</option>
+        <option value="critical">Critical</option>
+        <option value="high">High</option>
+        <option value="medium">Medium</option>
+        <option value="low">Low</option>
+      </select>
+    </div>
+
+    <div class="panel">
+      <div class="panel-body">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Type</th><th>Indicator</th><th>Severity</th><th>Confidence</th>
+              <th>Source</th><th>Tags</th><th>Last Seen</th><th>Hits</th>
+            </tr>
+          </thead>
+          <tbody id="iocs-tbody">
+            <tr><td colspan="8" class="loading"><div class="spinner"></div> Loading...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Threat Events ─────────────────────────────────────── -->
+  <div class="page" id="page-events">
+    <div class="page-header">
+      <div class="page-title">Threat Events <span>Security Incident Log</span></div>
+    </div>
+
+    <div class="filter-bar">
+      <select class="filter-select" id="evt-severity-filter" onchange="filterEvents()">
+        <option value="">All Severities</option>
+        <option value="critical">Critical</option>
+        <option value="high">High</option>
+        <option value="medium">Medium</option>
+        <option value="low">Low</option>
+      </select>
+      <select class="filter-select" id="evt-status-filter" onchange="filterEvents()">
+        <option value="">All Statuses</option>
+        <option value="active">Active</option>
+        <option value="investigating">Investigating</option>
+        <option value="mitigated">Mitigated</option>
+        <option value="resolved">Resolved</option>
+      </select>
+    </div>
+
+    <div class="panel">
+      <div class="panel-body">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>ID</th><th>Title</th><th>Severity</th><th>Status</th>
+              <th>Source IP</th><th>Actor</th><th>MITRE TTPs</th><th>Time</th>
+            </tr>
+          </thead>
+          <tbody id="events-tbody">
+            <tr><td colspan="8" class="loading"><div class="spinner"></div> Loading...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Threat Actors ─────────────────────────────────────── -->
+  <div class="page" id="page-actors">
+    <div class="page-header">
+      <div class="page-title">Threat Actors <span>APT Groups & Cybercriminals</span></div>
+    </div>
+
+    <div class="actor-grid" id="actors-grid">
+      <div class="loading"><div class="spinner"></div> Loading...</div>
+    </div>
+  </div>
+
+  <!-- ── Intel Feeds ───────────────────────────────────────── -->
+  <div class="page" id="page-feeds">
+    <div class="page-header">
+      <div class="page-title">Intel Feeds <span>Threat Data Sources</span></div>
+      <button class="btn btn-secondary btn-sm" onclick="loadFeeds()">↻ Refresh</button>
+    </div>
+
+    <div class="panel">
+      <div class="panel-body" id="feeds-list">
+        <div class="loading"><div class="spinner"></div> Loading...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── MITRE ATT&CK ──────────────────────────────────────── -->
+  <div class="page" id="page-mitre">
+    <div class="page-header">
+      <div class="page-title">MITRE ATT&CK <span>Tactics, Techniques & Procedures</span></div>
+      <div style="font-size:12px;color:var(--text-muted)">Framework v14.1</div>
+    </div>
+
+    <div class="mitre-grid" id="mitre-grid">
+      <div class="loading"><div class="spinner"></div> Loading...</div>
+    </div>
+  </div>
+
+  <!-- ── Playbooks ─────────────────────────────────────────── -->
+  <div class="page" id="page-playbooks">
+    <div class="page-header">
+      <div class="page-title">Response Playbooks <span>Automated IR Workflows</span></div>
+    </div>
+
+    <div class="playbook-grid" id="playbooks-grid">
+      <div class="loading"><div class="spinner"></div> Loading...</div>
+    </div>
+  </div>
+
+  <!-- ── Executions ────────────────────────────────────────── -->
+  <div class="page" id="page-executions">
+    <div class="page-header">
+      <div class="page-title">Response Executions <span>Automation History</span></div>
+      <button class="btn btn-secondary btn-sm" onclick="loadExecutions()">↻ Refresh</button>
+    </div>
+
+    <div class="metric-row">
+      <div class="metric-item">
+        <div class="metric-number" id="rsp-total">—</div>
+        <div class="metric-label">Total Runs</div>
+      </div>
+      <div class="metric-item">
+        <div class="metric-number" style="color:var(--success)" id="rsp-success">—</div>
+        <div class="metric-label">Successful</div>
+      </div>
+      <div class="metric-item">
+        <div class="metric-number" style="color:var(--critical)" id="rsp-failed">—</div>
+        <div class="metric-label">Failed</div>
+      </div>
+      <div class="metric-item">
+        <div class="metric-number" style="color:var(--high)" id="rsp-blocked">—</div>
+        <div class="metric-label">Threats Blocked</div>
+      </div>
+      <div class="metric-item">
+        <div class="metric-number" id="rsp-isolated">—</div>
+        <div class="metric-label">Hosts Isolated</div>
+      </div>
+      <div class="metric-item">
+        <div class="metric-number" id="rsp-ips">—</div>
+        <div class="metric-label">IPs Blocked</div>
+      </div>
+      <div class="metric-item">
+        <div class="metric-number" style="color:var(--accent-cyan)" id="rsp-avg">—</div>
+        <div class="metric-label">Avg Response</div>
+      </div>
+      <div class="metric-item">
+        <div class="metric-number" id="rsp-alerts">—</div>
+        <div class="metric-label">Alerts Sent</div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-header">
+        <span class="panel-title">📋 Execution History</span>
+      </div>
+      <div class="panel-body" id="executions-list">
+        <div class="loading">No executions yet. Go to Playbooks and run one!</div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<!-- ══════════════════════════════════════════════════════════
+     MODAL
+═══════════════════════════════════════════════════════════ -->
+<div class="modal-overlay" id="modal-overlay" style="display:none">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title" id="modal-title">Detail</span>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body" id="modal-body"></div>
+    <div class="modal-footer" id="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal()">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     TOASTS
+═══════════════════════════════════════════════════════════ -->
+<div class="toast-container" id="toast-container"></div>
+
+<!-- ══════════════════════════════════════════════════════════
+     SCRIPTS
+═══════════════════════════════════════════════════════════ -->
+<script src="/static/js/dashboard.js"></script>
+<script src="/static/js/threat-intel.js"></script>
+<script src="/static/js/auto-response.js"></script>
+
+</body>
+</html>
