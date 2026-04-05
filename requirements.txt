@@ -1,0 +1,16 @@
+Flask==3.0.3
+Flask-SQLAlchemy==3.1.1
+Flask-Login==0.6.3
+Flask-WTF==1.2.1
+WTForms==3.1.2
+SQLAlchemy==2.0.35
+pyotp==2.9.0
+qrcode==7.4.2
+Pillow==10.4.0
+reportlab==4.2.5
+fpdf2==2.8.1
+requests==2.32.3
+python-dotenv==1.0.1
+Werkzeug==3.0.4
+itsdangerous==2.2.0
+email-validator==2.2.0
