@@ -130,3 +130,31 @@ class SigmaRule(Base):
     author = Column(String)
     is_active = Column(Boolean, default=True)
     created_at = Column(DateTime, default=datetime.utcnow)
+
+
+class RedTeamOp(Base):
+    __tablename__ = "red_team_ops"
+    id = Column(Integer, primary_key=True, index=True)
+    title = Column(String, nullable=False)
+    description = Column(Text)
+    phase = Column(String, default="reconnaissance")
+    status = Column(String, default="planned")
+    operator = Column(String)
+    ttps = Column(String)
+    tenant_name = Column(String)
+    findings = Column(Text)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow)
+
+
+class BlueTeamPlaybook(Base):
+    __tablename__ = "blue_team_playbooks"
+    id = Column(Integer, primary_key=True, index=True)
+    title = Column(String, nullable=False)
+    description = Column(Text)
+    trigger = Column(Text)
+    category = Column(String, default="incident_response")
+    author = Column(String)
+    steps = Column(Text)
+    is_active = Column(Boolean, default=True)
+    created_at = Column(DateTime, default=datetime.utcnow)

@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from .database import engine, SessionLocal
 from . import models
 from .seed_data import LIBYAN_TENANTS, SAMPLE_VULNERABILITIES, SAMPLE_INCIDENTS, SIGMA_RULES, THREAT_INTEL_IOCS
-from .api import dashboard, tenants, incidents, vulnerabilities, threat_intel, reports, sigma_rules, scanner
+from .api import dashboard, tenants, incidents, vulnerabilities, threat_intel, reports, sigma_rules, scanner, red_team, blue_team
 from datetime import datetime, timedelta
 import random
 
@@ -27,6 +27,8 @@ app.include_router(threat_intel.router, prefix="/api/threat-intel", tags=["threa
 app.include_router(reports.router, prefix="/api/reports", tags=["reports"])
 app.include_router(sigma_rules.router, prefix="/api/sigma-rules", tags=["sigma-rules"])
 app.include_router(scanner.router, prefix="/api/scanner", tags=["scanner"])
+app.include_router(red_team.router)
+app.include_router(blue_team.router)
 
 
 @app.on_event("startup")

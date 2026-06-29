@@ -8,6 +8,8 @@ import ThreatIntel from './pages/ThreatIntel'
 import Reports from './pages/Reports'
 import SigmaRules from './pages/SigmaRules'
 import Scanner from './pages/Scanner'
+import RedTeam from './pages/RedTeam'
+import BlueTeam from './pages/BlueTeam'
 import Placeholder from './pages/Placeholder'
 
 export default function App() {
@@ -25,6 +27,8 @@ export default function App() {
             <Route path="/reports" element={<Reports />} />
             <Route path="/sigma-rules" element={<SigmaRules />} />
             <Route path="/scanner" element={<Scanner />} />
+            <Route path="/red-team" element={<RedTeam />} />
+            <Route path="/blue-team" element={<BlueTeam />} />
             <Route path="*" element={<Placeholder />} />
           </Routes>
         </main>
