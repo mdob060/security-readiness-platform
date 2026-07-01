@@ -34,7 +34,10 @@ def _build_offensive_argv(tool: str, target: str, service: str | None) -> list[s
         return ["nmap", "-T4", "-sV", "-Pn", "--top-ports", "100", target]
     if tool == "nuclei":
         url = target if target.startswith(("http://", "https://")) else f"http://{target}"
-        return ["nuclei", "-u", url, "-silent", "-timeout", "10", "-severity", "info,low,medium,high,critical"]
+        return [
+            "nuclei", "-u", url, "-silent", "-duc", "-nc", "-timeout", "10",
+            "-severity", "info,low,medium,high,critical",
+        ]
     if tool == "sqlmap":
         url = target if target.startswith(("http://", "https://")) else f"http://{target}"
         return ["sqlmap", "-u", url, "--batch", "--level=1", "--risk=1", "--random-agent"]
