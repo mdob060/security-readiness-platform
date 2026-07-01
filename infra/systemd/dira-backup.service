@@ -1,0 +1,10 @@
+[Unit]
+Description=Dir'a Security Platform - Database Backup
+After=postgresql.service
+
+[Service]
+Type=oneshot
+User=dira
+Group=dira
+Environment=PGPASSWORD=changeme-set-in-env-file
+ExecStart=/opt/dira/infra/scripts/backup-db.sh

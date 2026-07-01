@@ -1,0 +1,22 @@
+[Unit]
+Description=Dir'a Security Platform - Main API (HTTPS)
+After=network.target postgresql.service redis-server.service dira-api.service
+Wants=postgresql.service redis-server.service
+
+[Service]
+Type=simple
+User=dira
+Group=dira
+WorkingDirectory=/opt/dira/backend
+EnvironmentFile=/opt/dira/backend/.env
+Environment=ENABLE_EMBEDDED_SCHEDULER=false
+Environment=ENABLE_EMBEDDED_HONEYPOTS=false
+ExecStart=/opt/dira/backend/.venv/bin/uvicorn app.main:app --host 0.0.0.0 --port 8443 \
+    --ssl-keyfile /etc/dira/tls/privkey.pem --ssl-certfile /etc/dira/tls/fullchain.pem
+Restart=on-failure
+RestartSec=5
+NoNewPrivileges=true
+AmbientCapabilities=CAP_NET_BIND_SERVICE
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,18 @@
+[Unit]
+Description=Dir'a Security Platform - Honeypot Listeners
+After=network.target dira-api.service
+Wants=postgresql.service
+
+[Service]
+Type=simple
+User=dira
+Group=dira
+WorkingDirectory=/opt/dira/backend
+EnvironmentFile=/opt/dira/backend/.env
+ExecStart=/opt/dira/backend/.venv/bin/python -m app.honeypot_worker
+Restart=on-failure
+RestartSec=5
+NoNewPrivileges=true
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,6 @@
+[DEFAULT]
+banaction = iptables-multiport
+banaction_allports = iptables-allports
+
+[sshd]
+enabled = false
