@@ -30,5 +30,12 @@ class Settings(BaseSettings):
     allow_public_scan_targets: bool = False
     scan_timeout_seconds: int = 300
 
+    # In production (systemd), the monitor loop and honeypot listeners run as
+    # their own services (dira-monitor.service / dira-honeypot.service), so
+    # the API process should not also start them. Local `uvicorn` dev runs
+    # keep both embedded (default) for a single-process getting-started path.
+    enable_embedded_scheduler: bool = True
+    enable_embedded_honeypots: bool = True
+
 
 settings = Settings()

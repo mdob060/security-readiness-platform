@@ -1,0 +1,18 @@
+[Unit]
+Description=Dir'a Security Platform - Frontend (Next.js)
+After=network.target dira-api.service
+
+[Service]
+Type=simple
+User=dira
+Group=dira
+WorkingDirectory=/opt/dira/frontend
+Environment=NODE_ENV=production
+Environment=PORT=3000
+ExecStart=/usr/bin/npm run start
+Restart=on-failure
+RestartSec=5
+NoNewPrivileges=true
+
+[Install]
+WantedBy=multi-user.target

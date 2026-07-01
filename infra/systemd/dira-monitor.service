@@ -1,0 +1,18 @@
+[Unit]
+Description=Dir'a Security Platform - SOC Detection Monitor
+After=network.target postgresql.service dira-api.service
+Wants=postgresql.service
+
+[Service]
+Type=simple
+User=dira
+Group=dira
+WorkingDirectory=/opt/dira/backend
+EnvironmentFile=/opt/dira/backend/.env
+ExecStart=/opt/dira/backend/.venv/bin/python -m app.monitor_worker
+Restart=on-failure
+RestartSec=5
+NoNewPrivileges=true
+
+[Install]
+WantedBy=multi-user.target

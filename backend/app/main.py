@@ -16,12 +16,16 @@ scheduler = BackgroundScheduler()
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    start_honeypots()
-    scheduler.add_job(run_detection_cycle, "interval", seconds=10, id="detection_cycle")
-    scheduler.start()
+    if settings.enable_embedded_honeypots:
+        start_honeypots()
+    if settings.enable_embedded_scheduler:
+        scheduler.add_job(run_detection_cycle, "interval", seconds=10, id="detection_cycle")
+        scheduler.start()
     yield
-    scheduler.shutdown(wait=False)
-    stop_honeypots()
+    if settings.enable_embedded_scheduler and scheduler.running:
+        scheduler.shutdown(wait=False)
+    if settings.enable_embedded_honeypots:
+        stop_honeypots()
 
 
 app = FastAPI(title=settings.app_name, version="0.1.0", lifespan=lifespan)
