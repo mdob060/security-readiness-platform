@@ -22,14 +22,17 @@ echo "==> Updating apt and fixing any pre-existing broken/held packages"
 apt-get update
 # Many Kali desktop installs end up with kali-desktop-gnome (or similar)
 # stuck with an unsatisfiable dependency chain -- unrelated to this app, but
-# it makes apt's resolver refuse to touch *any* install request. `apt
-# --fix-broken install` only fixes half-installed (dpkg-level broken)
-# packages, not this case, so explicitly hold the offending meta-package
-# instead so apt's solver skips it when resolving new installs.
-apt --fix-broken install -y || true
+# it makes apt's resolver refuse to touch *any* install request. Holding it
+# makes this WORSE (apt then can't resolve the break at all -- "this may be
+# caused by held packages" is apt telling you exactly that). The actual fix
+# is to remove the empty meta-package reference; this does not remove any
+# already-installed real desktop components (gnome-shell, gdm3, etc.),
+# which are separate packages and untouched by a plain `apt remove`.
 for pkg in kali-desktop-gnome kali-desktop-core kali-desktop-xfce kali-desktop-kde; do
-  dpkg -l "$pkg" &>/dev/null && apt-mark hold "$pkg" || true
+  apt-mark unhold "$pkg" &>/dev/null || true
+  dpkg -l "$pkg" 2>/dev/null | grep -q "^.i" && apt-get remove --purge -y "$pkg" || true
 done
+apt --fix-broken install -y || true
 
 # Tools already present on most Kali installs are listed too -- apt just
 # reports "already the newest version" for those, which is harmless.
