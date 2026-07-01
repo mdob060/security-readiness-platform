@@ -17,6 +17,7 @@ from sqlalchemy.orm import Session
 
 from app.models.auth import LoginAttempt
 from app.models.monitoring import Alert, Incident, PipelineEvent, SecurityEvent, SigmaRule
+from app.services.soar import generate_pending_decisions
 
 logger = logging.getLogger("dira.detection")
 
@@ -135,6 +136,7 @@ def run_detection_cycle() -> None:
         detect_bruteforce(db)
         apply_sigma_rules(db)
         auto_open_incidents(db)
+        generate_pending_decisions(db)
     except Exception:
         logger.exception("Detection cycle failed")
         db.rollback()

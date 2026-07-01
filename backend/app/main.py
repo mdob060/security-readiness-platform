@@ -5,7 +5,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.routers import auth as auth_router
-from app.api.routers import blue_team, monitoring, red_team, scan_scope
+from app.api.routers import blue_team, intelligence, management, monitoring, red_team, scan_scope, sectors
 from app.core.config import settings
 from app.core.middleware import BodySizeLimitMiddleware, SecurityHeadersMiddleware
 from app.services.detection_engine import run_detection_cycle
@@ -49,6 +49,22 @@ app.include_router(monitoring.honeypot_router)
 app.include_router(monitoring.hunting_router)
 app.include_router(monitoring.pipeline_router)
 app.include_router(monitoring.dashboard_router)
+app.include_router(intelligence.ai_brain_router)
+app.include_router(intelligence.automation_router)
+app.include_router(intelligence.threat_intel_router)
+app.include_router(intelligence.federation_router)
+app.include_router(sectors.banking_router)
+app.include_router(sectors.ot_scada_router)
+app.include_router(sectors.ueba_router)
+app.include_router(sectors.swift_csp_router)
+app.include_router(sectors.aml_router)
+app.include_router(sectors.sector_monitor_router)
+app.include_router(management.grc_router)
+app.include_router(management.tenants_router)
+app.include_router(management.analytics_router)
+app.include_router(management.reports_router)
+app.include_router(management.phishing_router)
+app.include_router(management.settings_router)
 
 
 @app.get("/api/health")

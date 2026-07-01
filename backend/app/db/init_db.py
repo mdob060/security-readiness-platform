@@ -4,9 +4,10 @@ from app.core.security import hash_password
 from app.db.base import Base, SessionLocal, engine
 from app.models import ALL_SCHEMAS
 from app.models.auth import User
-from app.models.management import GrcFramework, ModuleSetting
+from app.models.management import GrcControl, GrcFramework, ModuleSetting
+from app.models.intelligence import ThreatActor
 from app.models.scanning import PciDssControl
-from app.models.sectors import SwiftControl
+from app.models.sectors import AmlSanctionsEntry, SwiftControl
 from app.models.tenants import Tenant
 
 
@@ -37,11 +38,29 @@ def seed_reference_data() -> None:
             )
 
         if not db.query(GrcFramework).first():
+            iso = GrcFramework(name="ISO 27001")
+            nist = GrcFramework(name="NIST CSF")
+            pci = GrcFramework(name="PCI DSS")
+            db.add_all([iso, nist, pci])
+            db.flush()
+        else:
+            iso = db.query(GrcFramework).filter_by(name="ISO 27001").first()
+            nist = db.query(GrcFramework).filter_by(name="NIST CSF").first()
+            pci = db.query(GrcFramework).filter_by(name="PCI DSS").first()
+
+        if not db.query(GrcControl).first():
             db.add_all(
                 [
-                    GrcFramework(name="ISO 27001"),
-                    GrcFramework(name="NIST CSF"),
-                    GrcFramework(name="PCI DSS"),
+                    GrcControl(framework_id=iso.id, code="A.5.1", title="Policies for information security"),
+                    GrcControl(framework_id=iso.id, code="A.8.1", title="Inventory of assets"),
+                    GrcControl(framework_id=iso.id, code="A.9.1", title="Access control policy"),
+                    GrcControl(framework_id=iso.id, code="A.12.4", title="Event logging"),
+                    GrcControl(framework_id=nist.id, code="ID.AM", title="Asset Management"),
+                    GrcControl(framework_id=nist.id, code="PR.AC", title="Identity Management and Access Control"),
+                    GrcControl(framework_id=nist.id, code="DE.CM", title="Security Continuous Monitoring"),
+                    GrcControl(framework_id=nist.id, code="RS.RP", title="Response Planning"),
+                    GrcControl(framework_id=pci.id, code="Req-1", title="Install and maintain network security controls"),
+                    GrcControl(framework_id=pci.id, code="Req-10", title="Log and monitor all access"),
                 ]
             )
 
@@ -63,6 +82,34 @@ def seed_reference_data() -> None:
                     SwiftControl(control_code="5.1", title="Logical Access Control", category="restrict"),
                     SwiftControl(control_code="6.1", title="Malware Protection", category="detect"),
                     SwiftControl(control_code="7.1", title="Cyber Incident Response Planning", category="detect"),
+                ]
+            )
+
+        if not db.query(ThreatActor).first():
+            db.add_all(
+                [
+                    ThreatActor(name="APT28", aliases="Fancy Bear, Sofacy", origin="Russia", motivation="Espionage",
+                                description="State-sponsored group known for spear-phishing and credential harvesting."),
+                    ThreatActor(name="APT29", aliases="Cozy Bear, Nobelium", origin="Russia", motivation="Espionage",
+                                description="Known for supply-chain compromises and stealthy long-term access."),
+                    ThreatActor(name="Lazarus Group", aliases="Hidden Cobra", origin="North Korea", motivation="Financial, Espionage",
+                                description="Linked to banking heists (SWIFT) and ransomware operations."),
+                    ThreatActor(name="FIN7", aliases="Carbanak", origin="Unknown", motivation="Financial",
+                                description="Targets retail and hospitality payment card data."),
+                    ThreatActor(name="Conti", aliases=None, origin="Unknown", motivation="Financial (ransomware)",
+                                description="Ransomware-as-a-service group targeting healthcare and critical infrastructure."),
+                ]
+            )
+
+        if not db.query(AmlSanctionsEntry).first():
+            # Illustrative demo watchlist only. Production deployments should load the
+            # real OFAC SDN / UN / EU consolidated sanctions lists (public downloads).
+            db.add_all(
+                [
+                    AmlSanctionsEntry(full_name="Karim Al-Rashidi", list_source="DEMO-WATCHLIST", entity_type="individual", country="N/A"),
+                    AmlSanctionsEntry(full_name="Northgate Trading Corp", list_source="DEMO-WATCHLIST", entity_type="entity", country="N/A"),
+                    AmlSanctionsEntry(full_name="Viktor Meridian", list_source="DEMO-WATCHLIST", entity_type="individual", country="N/A"),
+                    AmlSanctionsEntry(full_name="Sample Sanctioned Holdings Ltd", list_source="DEMO-WATCHLIST", entity_type="entity", country="N/A"),
                 ]
             )
 
