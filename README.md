@@ -87,6 +87,30 @@ Default seeded login: `admin` / `ChangeMe123!` — **change this immediately**
 after first login (via `POST /api/auth/users` as another admin, or a direct
 DB update, since there is no self-service password-reset flow yet).
 
+## Running on Kali Linux
+
+Kali is a natural fit for Dir'a — it already ships most of the integrated
+tools (nmap, sqlmap, gobuster, ffuf, nikto, hydra, wpscan, dnsrecon, masscan,
+whatweb, amass, and usually nuclei) out of the box. A dedicated script
+handles the rest:
+
+```bash
+sudo ./infra/scripts/setup-kali.sh
+```
+
+This installs whatever Kali doesn't ship by default (Postgres, Redis,
+fail2ban, clamav, rkhunter, chkrootkit — none of these are on Kali by
+default), grants `nmap`/`masscan` raw-socket capabilities (via `setcap`, so
+scans work without running the app as root), creates the database, builds
+the frontend, and prints the two commands to start both servers. Open
+`http://localhost:3000` (or your Kali VM's IP if accessing from the host
+machine) and log in with `admin` / `ChangeMe123!` — change it immediately.
+
+Pass `--systemd` to also install it as persistent background services
+(`sudo ./infra/scripts/setup-kali.sh --systemd`) instead of running it
+manually in a terminal — see the systemd section below, which applies to
+Kali the same as any other systemd-based Linux install.
+
 ## Production deployment
 
 See `infra/scripts/setup-server.sh` for a scripted Ubuntu 24.04 provisioning
