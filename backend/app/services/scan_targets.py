@@ -52,10 +52,20 @@ def _is_private_host(host: str) -> bool:
         return False
 
 
+def _strip_port(host: str) -> str:
+    """Strips a trailing ':<port>' (e.g. '127.0.0.1:8000' -> '127.0.0.1'),
+    while leaving bare IPv6 addresses (which contain multiple colons) alone."""
+    if host.count(":") == 1:
+        candidate_host, _, candidate_port = host.rpartition(":")
+        if candidate_port.isdigit():
+            return candidate_host
+    return host
+
+
 def enforce_network_scope(target: str) -> None:
     if settings.allow_public_scan_targets:
         return
-    host = target.split("/")[0]
+    host = _strip_port(target.split("/")[0])
     if not _is_private_host(host):
         raise TargetValidationError(
             "This platform is configured to only scan private/localhost targets. "

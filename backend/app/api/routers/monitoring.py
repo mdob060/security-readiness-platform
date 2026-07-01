@@ -202,8 +202,6 @@ def recent_pipeline(db: Session = Depends(get_db), user: User = Depends(get_curr
 
 @dashboard_router.get("/summary")
 def dashboard_summary(db: Session = Depends(get_db), user: User = Depends(get_current_user)):
-    from app.models.incidents import Incident as IncidentAlias  # noqa: F401
-
     return {
         "total_events_24h": db.query(SecurityEvent).count(),
         "open_alerts": db.query(Alert).filter(Alert.status == "open").count(),
