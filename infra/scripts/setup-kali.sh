@@ -18,11 +18,18 @@ INSTALL_DIR="/opt/dira"
 WITH_SYSTEMD=false
 [[ "${1:-}" == "--systemd" ]] && WITH_SYSTEMD=true
 
-echo "==> Updating apt and installing anything Kali doesn't ship by default"
+echo "==> Updating apt and fixing any pre-existing broken/held packages"
 apt-get update
+# Many Kali desktop installs accumulate an unmet dependency on
+# kali-desktop-gnome (or similar) that has nothing to do with this app, but
+# makes apt's resolver choke on *any* install request. Clear that first.
+apt --fix-broken install -y || true
+
 # Tools already present on most Kali installs are listed too -- apt just
 # reports "already the newest version" for those, which is harmless.
-apt-get install -y \
+# --no-install-recommends avoids pulling in unrelated desktop-environment
+# recommends that can retrigger the same resolver conflict.
+apt-get install -y --no-install-recommends \
   postgresql postgresql-contrib redis-server \
   python3 python3-venv python3-pip \
   nmap gobuster ffuf sqlmap nikto masscan whatweb hydra wpscan dnsrecon amass \
@@ -31,7 +38,7 @@ apt-get install -y \
 
 echo "==> Checking for nuclei (Kali packages it as of 2023.x; older installs need go install)"
 if ! command -v nuclei &>/dev/null; then
-  apt-get install -y nuclei || {
+  apt-get install -y --no-install-recommends nuclei || {
     echo "    apt package not available on this Kali version -- building from source"
     go install github.com/projectdiscovery/nuclei/v3/cmd/nuclei@latest
     ln -sf "$HOME/go/bin/nuclei" /usr/local/bin/nuclei
@@ -47,7 +54,7 @@ fi
 if [[ "$NODE_OK" == "false" ]]; then
   echo "    Installing Node.js 20.x from NodeSource"
   curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
-  apt-get install -y nodejs
+  apt-get install -y --no-install-recommends nodejs
 fi
 
 echo "==> Starting Postgres/Redis (Kali doesn't enable them by default)"
